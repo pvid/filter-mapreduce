@@ -1,0 +1,19 @@
+option java_package = "dev.vidlicka.hbase.filtermapreduce.reducer";
+option java_outer_classname = "ProtoService";
+option optimize_for = SPEED;
+option java_generic_services = true;
+
+
+service ReducerService {
+    rpc reduce(ReducerRequest) returns (ReducerResponse);
+}
+
+message ReducerRequest {
+    required bytes initial_value = 1;
+    required bytes reducer = 2;
+    optional bytes serializedScan = 3;
+}
+
+message ReducerResponse {
+    required bytes result = 1;
+}
