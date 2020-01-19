@@ -21,7 +21,7 @@ public class HBaseMiniClusterUtil extends ExternalResource {
   private HBaseTestingUtility utility;
 
   public HBaseMiniClusterUtil() {
-    utility = HBaseTestingUtility.createLocalHTU();
+    utility = new HBaseTestingUtility();
     this.configuration = utility.getConfiguration();
 
     configuration.unset("hadoop.log.dir");

@@ -66,7 +66,7 @@ public class BasicDatasetSuiteElement {
 
   @Test
   public void datasetFromScan() throws Throwable {
-    Scan scan = new Scan(Bytes.toBytes(20L), Bytes.toBytes(30L));
+    Scan scan = new Scan().withStartRow(Bytes.toBytes(20L)).withStopRow(Bytes.toBytes(30L));
 
     Dataset dataset = new Dataset(table, scan);
 
@@ -126,7 +126,7 @@ public class BasicDatasetSuiteElement {
 
   @Test
   public void operationChaining() throws Throwable {
-    Scan scan = new Scan(Bytes.toBytes(20L), Bytes.toBytes(40L));
+    Scan scan = new Scan().withStartRow(Bytes.toBytes(20L)).withStopRow(Bytes.toBytes(40L));
 
     Dataset dataset = new Dataset(table, scan);
 
