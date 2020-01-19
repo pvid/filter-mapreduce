@@ -2,13 +2,13 @@ package dev.vidlicka.hbase.filtermapreduce.filters;
 
 import java.io.IOException;
 import java.util.Arrays;
-
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.filter.Filter;
-
+import org.apache.hadoop.hbase.filter.FilterBase;
 import dev.vidlicka.hbase.filtermapreduce.SerdeUtil;
 
-public class RowkeyPredicateFilter extends ExtendedFilterBase {
+public class RowkeyPredicateFilter extends FilterBase {
 
   SerializablePredicate<byte[]> predicate;
 
@@ -17,9 +17,10 @@ public class RowkeyPredicateFilter extends ExtendedFilterBase {
   }
 
   @Override
-  public boolean filterRowKey(byte[] buffer, int offset, int length) {
+  public boolean filterRowKey(Cell cell) {
     // we want to filter row out, when predicate returns false
-    return !predicate.test(Arrays.copyOfRange(buffer, offset, offset + length));
+    return !predicate.test(Arrays.copyOfRange(cell.getRowArray(), cell.getRowOffset(),
+        cell.getRowOffset() + cell.getRowLength()));
   }
 
   public boolean hasFilterRow() {

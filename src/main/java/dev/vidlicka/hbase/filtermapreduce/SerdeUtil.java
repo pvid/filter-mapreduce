@@ -43,6 +43,7 @@ public final class SerdeUtil {
    */
   public static <T> T deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
     ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
+    @SuppressWarnings("unchecked")
     T deserialized = (T) in.readObject();
     in.close();
     return deserialized;

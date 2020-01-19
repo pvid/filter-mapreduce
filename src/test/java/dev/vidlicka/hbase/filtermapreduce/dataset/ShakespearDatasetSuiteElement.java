@@ -12,11 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Stream;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptorBuilder;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
@@ -45,9 +46,10 @@ public class ShakespearDatasetSuiteElement {
   public static void setup() throws IOException {
     LOG.info("Starting Shakespear suite...");
     // create table
-    HTableDescriptor shakespearTableDesc = new HTableDescriptor(TableName.valueOf(TABLE));
-    shakespearTableDesc.addFamily(new HColumnDescriptor(TestUtils.CF));
-    shakespearTableDesc.addCoprocessor(ReducerEndpoint.class.getName());
+    TableDescriptor shakespearTableDesc =
+        TableDescriptorBuilder.newBuilder(TableName.valueOf(TABLE))
+            .setColumnFamily(ColumnFamilyDescriptorBuilder.of(TestUtils.CF))
+            .setCoprocessor(ReducerEndpoint.class.getName()).build();
     MiniClusterSuite.hbase.getAdmin().createTable(shakespearTableDesc);
 
     table = MiniClusterSuite.hbase.getTableByName(TABLE);

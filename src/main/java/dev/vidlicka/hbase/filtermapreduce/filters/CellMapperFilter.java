@@ -1,14 +1,13 @@
 package dev.vidlicka.hbase.filtermapreduce.filters;
 
 import java.io.IOException;
-
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.filter.Filter;
-
+import org.apache.hadoop.hbase.filter.FilterBase;
 import dev.vidlicka.hbase.filtermapreduce.SerdeUtil;
 
-public class CellMapperFilter extends ExtendedFilterBase {
+public class CellMapperFilter extends FilterBase {
 
   SerializableFunction<Cell, Cell> func;
 

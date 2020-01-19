@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellBuilderFactory;
+import org.apache.hadoop.hbase.CellBuilderType;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -87,9 +89,15 @@ public class Dataset {
    * @throws IOException
    */
   public Dataset mapCellValues(SerializableFunction<byte[], byte[]> func) throws IOException {
-    SerializableFunction<Cell, Cell> cellMap = cell -> CellUtil.createCell(CellUtil.cloneRow(cell),
-        CellUtil.cloneFamily(cell), CellUtil.cloneQualifier(cell), cell.getTimestamp(),
-        cell.getTypeByte(), func.apply(CellUtil.cloneValue(cell)));
+    SerializableFunction<Cell, Cell> cellMap =
+        cell -> CellBuilderFactory.create(CellBuilderType.DEEP_COPY)
+            .setRow(cell.getRowArray(), cell.getRowOffset(), cell.getRowLength())
+            .setFamily(cell.getFamilyArray(), cell.getFamilyOffset(), cell.getFamilyLength())
+            .setQualifier(cell.getQualifierArray(), cell.getQualifierOffset(),
+                cell.getQualifierLength())
+            .setTimestamp(cell.getTimestamp()).setType(cell.getType())
+            // apply the function to cell value
+            .setValue(func.apply(CellUtil.cloneValue(cell))).build();
     return mapCells(cellMap);
   }
 

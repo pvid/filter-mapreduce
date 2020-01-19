@@ -1,24 +1,22 @@
 package dev.vidlicka.hbase.filtermapreduce.dataset;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.hadoop.hbase.CellUtil;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptorBuilder;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import dev.vidlicka.hbase.filtermapreduce.MiniClusterSuite;
 import dev.vidlicka.hbase.filtermapreduce.filters.RowkeyPredicateFilter;
 import dev.vidlicka.hbase.filtermapreduce.reducer.ReducerEndpoint;
@@ -34,9 +32,9 @@ public class BasicDatasetSuiteElement {
   @BeforeClass
   public static void setup() throws IOException {
     // create table
-    HTableDescriptor mapreduceTableDesc = new HTableDescriptor(TableName.valueOf(TABLE));
-    mapreduceTableDesc.addFamily(new HColumnDescriptor(TestUtils.CF));
-    mapreduceTableDesc.addCoprocessor(ReducerEndpoint.class.getName());
+    TableDescriptor mapreduceTableDesc = TableDescriptorBuilder.newBuilder(TableName.valueOf(TABLE))
+        .setColumnFamily(ColumnFamilyDescriptorBuilder.of(TestUtils.CF))
+        .setCoprocessor(ReducerEndpoint.class.getName()).build();
     MiniClusterSuite.hbase.getAdmin().createTable(mapreduceTableDesc);
 
     // put in some values

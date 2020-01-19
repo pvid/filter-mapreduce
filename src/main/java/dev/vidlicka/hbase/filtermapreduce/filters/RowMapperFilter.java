@@ -7,10 +7,10 @@ import java.util.List;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.filter.Filter;
-
+import org.apache.hadoop.hbase.filter.FilterBase;
 import dev.vidlicka.hbase.filtermapreduce.SerdeUtil;
 
-public class RowMapperFilter extends ExtendedFilterBase {
+public class RowMapperFilter extends FilterBase {
 
   SerializableFunction<List<Cell>, List<Cell>> func;
 

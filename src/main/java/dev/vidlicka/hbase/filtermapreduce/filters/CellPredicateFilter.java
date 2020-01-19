@@ -18,7 +18,7 @@ public class CellPredicateFilter extends FilterBase {
   }
 
   @Override
-  public ReturnCode filterKeyValue(Cell v) throws IOException {
+  public ReturnCode filterCell(Cell v) throws IOException {
     if (predicate.test(v)) {
       return ReturnCode.INCLUDE;
     }

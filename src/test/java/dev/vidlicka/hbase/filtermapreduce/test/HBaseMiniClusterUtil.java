@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.StartMiniClusterOption;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
@@ -38,13 +39,17 @@ public class HBaseMiniClusterUtil extends ExternalResource {
   @Override
   protected void before() throws Exception {
     log.info("Starting HBase mini cluster...");
-    utility.startMiniCluster(1, true);
+
+    StartMiniClusterOption options = StartMiniClusterOption.builder().numRegionServers(1)
+        .numDataNodes(1).createRootDir(true).build();
+
+    utility.startMiniCluster(options);
     configuration.reloadConfiguration();
     utility.getHBaseCluster().waitForActiveAndReadyMaster();
 
     this.connection = utility.getConnection();
 
-    this.admin = utility.getHBaseAdmin();
+    this.admin = utility.getAdmin();
     log.info("Mini cluster started.");
   }
 
@@ -52,6 +57,7 @@ public class HBaseMiniClusterUtil extends ExternalResource {
   protected void after() {
     try {
       connection.close();
+      admin.close();
       log.info("Shutting down mini cluster...");
       utility.shutdownMiniCluster();
     } catch (Exception e) {

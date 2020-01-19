@@ -3,17 +3,14 @@ package dev.vidlicka.hbase.filtermapreduce.reducer;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
 import com.google.protobuf.ByteString;
-
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.coprocessor.Batch;
-import org.apache.hadoop.hbase.ipc.BlockingRpcCallback;
+import org.apache.hadoop.hbase.ipc.CoprocessorRpcUtils.BlockingRpcCallback;
 import org.apache.hadoop.hbase.ipc.ServerRpcController;
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil;
-
 import dev.vidlicka.hbase.filtermapreduce.SerdeUtil;
 import dev.vidlicka.hbase.filtermapreduce.reducer.ProtoService.ReducerRequest;
 import dev.vidlicka.hbase.filtermapreduce.reducer.ProtoService.ReducerResponse;
