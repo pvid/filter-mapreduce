@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 /**
  * Contains helper methods for serialization and deserialization of Java objects.
  *
- * CAUTION: the purpose was to be as simple and straightforward as possible performance, safety and
+ * CAUTION: the purpose was to be as simple and straightforward as possible. Performance, safety and
  * portability was not a concern
  */
 public final class SerdeUtil {
