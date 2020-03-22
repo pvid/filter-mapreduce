@@ -23,10 +23,6 @@ public class RowkeyPredicateFilter extends FilterBase {
         cell.getRowOffset() + cell.getRowLength()));
   }
 
-  public boolean hasFilterRow() {
-    return true;
-  }
-
   @Override
   public byte[] toByteArray() throws IOException {
     return SerdeUtil.serialize(predicate);
