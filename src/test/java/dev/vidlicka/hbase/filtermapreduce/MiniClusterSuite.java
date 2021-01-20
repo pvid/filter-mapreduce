@@ -5,14 +5,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import dev.vidlicka.hbase.filtermapreduce.dataset.BasicDatasetSuiteElement;
-import dev.vidlicka.hbase.filtermapreduce.dataset.ShakespearDatasetSuiteElement;
+import dev.vidlicka.hbase.filtermapreduce.dataset.ShakespeareDatasetSuiteElement;
 import dev.vidlicka.hbase.filtermapreduce.filters.BasicFilterFunctionalitySuiteElement;
 import dev.vidlicka.hbase.filtermapreduce.reducer.BasicReducerFunctionalitySuiteElement;
 import dev.vidlicka.hbase.filtermapreduce.test.HBaseMiniClusterUtil;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({BasicDatasetSuiteElement.class, BasicFilterFunctionalitySuiteElement.class,
-    BasicReducerFunctionalitySuiteElement.class, ShakespearDatasetSuiteElement.class})
+    BasicReducerFunctionalitySuiteElement.class, ShakespeareDatasetSuiteElement.class})
 public class MiniClusterSuite {
   @ClassRule
   public static HBaseMiniClusterUtil hbase = new HBaseMiniClusterUtil();

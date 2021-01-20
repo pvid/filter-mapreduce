@@ -8,4 +8,4 @@ awk 'NR % 2 == 0' shakespeare.json \
             "speaker": .speaker,
             "text": .text_entry
         }' \
-> ./src/test/resources/shakespear-cleaned.json
+> ./src/test/resources/shakespeare-cleaned.json

@@ -32,12 +32,12 @@ import dev.vidlicka.hbase.filtermapreduce.reducer.ReducerEndpoint;
 import dev.vidlicka.hbase.filtermapreduce.reducer.SerializableBiFunction;
 import dev.vidlicka.hbase.filtermapreduce.test.TestUtils;
 
-public class ShakespearDatasetSuiteElement {
+public class ShakespeareDatasetSuiteElement {
 
-  private static Logger LOG = LoggerFactory.getLogger(ShakespearDatasetSuiteElement.class);
+  private static Logger LOG = LoggerFactory.getLogger(ShakespeareDatasetSuiteElement.class);
 
-  private static byte[] TABLE = Bytes.toBytes("shakespear_table");
-  private static Table shakespearTable;
+  private static byte[] TABLE = Bytes.toBytes("shakespeare_table");
+  private static Table shakespeareTable;
 
   private static Long ZERO = 0L;
 
@@ -47,18 +47,18 @@ public class ShakespearDatasetSuiteElement {
 
   @BeforeClass
   public static void setup() throws IOException {
-    LOG.info("Starting Shakespear suite...");
+    LOG.info("Starting Shakespeare suite...");
     // create table
-    TableDescriptor shakespearTableDesc =
+    TableDescriptor shakespeareTableDesc =
         TableDescriptorBuilder.newBuilder(TableName.valueOf(TABLE))
             .setColumnFamily(ColumnFamilyDescriptorBuilder.of(TestUtils.CF))
             .setCoprocessor(ReducerEndpoint.class.getName()).build();
-    MiniClusterSuite.hbase.getAdmin().createTable(shakespearTableDesc);
+    MiniClusterSuite.hbase.getAdmin().createTable(shakespeareTableDesc);
 
-    shakespearTable = MiniClusterSuite.hbase.getTableByName(TABLE);
+    shakespeareTable = MiniClusterSuite.hbase.getTableByName(TABLE);
 
-    populateShakespearTable(shakespearTable);
-    LOG.info("Shakespear table populated.");
+    populateShakespeareTable(shakespeareTable);
+    LOG.info("Shakespeare table populated.");
   }
 
   @AfterClass
@@ -68,7 +68,7 @@ public class ShakespearDatasetSuiteElement {
 
   @Test
   public void countLines() throws Throwable {
-    Dataset dataset = new Dataset(shakespearTable);
+    Dataset dataset = new Dataset(shakespeareTable);
 
     Long result =
         dataset.reduceRows(ZERO, (acc, row) -> acc + 1, ZERO, (acc, count) -> acc + count);
@@ -78,12 +78,12 @@ public class ShakespearDatasetSuiteElement {
 
   @Test
   public void wordCount() throws Throwable {
-    Dataset dataset = new Dataset(shakespearTable);
+    Dataset dataset = new Dataset(shakespeareTable);
 
     SerializableFunction<byte[], byte[]> extractText = cellValue -> {
       try {
-        ShakespearRecord record =
-            new ObjectMapper().readValue(Bytes.toString(cellValue), ShakespearRecord.class);
+        ShakespeareRecord record =
+            new ObjectMapper().readValue(Bytes.toString(cellValue), ShakespeareRecord.class);
         return Bytes.toBytes(record.text);
       } catch (Throwable e) {
         throw new RuntimeException(e);
@@ -134,15 +134,15 @@ public class ShakespearDatasetSuiteElement {
 
   @Test
   public void countSpeakersAndTheirLines() throws Throwable {
-    Dataset dataset = new Dataset(shakespearTable);
+    Dataset dataset = new Dataset(shakespeareTable);
 
     dataset.filterByRowkey(rowkey -> rowkey[0] % 2 == 0).toScanner();
 
     SerializableBiFunction<Map<String, Integer>, byte[], Map<String, Integer>> reducer =
         (acc, value) -> {
           try {
-            ShakespearRecord record =
-                new ObjectMapper().readValue(Bytes.toString(value), ShakespearRecord.class);
+            ShakespeareRecord record =
+                new ObjectMapper().readValue(Bytes.toString(value), ShakespeareRecord.class);
             acc.put(record.speaker, acc.getOrDefault(record.speaker, 0) + 1);
           } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -165,13 +165,13 @@ public class ShakespearDatasetSuiteElement {
     LOG.info("Most lines ({} in fact) were spoken by {}", result.get(mostSpeaker), mostSpeaker);
   }
 
-  private static void populateShakespearTable(Table table) throws IOException {
+  private static void populateShakespeareTable(Table table) throws IOException {
 
     List<String> plays = loadPlays();
 
     ArrayList<Put> puts = new ArrayList<>();
     try (Stream<String> stream =
-        Files.lines(Paths.get("src/test/resources/shakespear-cleaned.json"))) {
+        Files.lines(Paths.get("src/test/resources/shakespeare-cleaned.json"))) {
       stream.forEach(line -> {
         try {
           puts.add(toPut(line, plays));
@@ -183,7 +183,7 @@ public class ShakespearDatasetSuiteElement {
     table.put(puts);
   }
 
-  private static class ShakespearRecord {
+  private static class ShakespeareRecord {
     public String play;
     public String lineCoordinates;
     public String speaker;
@@ -201,7 +201,7 @@ public class ShakespearDatasetSuiteElement {
   }
 
   private static Put toPut(String rawRecord, List<String> plays) throws Throwable {
-    ShakespearRecord record = new ObjectMapper().readValue(rawRecord, ShakespearRecord.class);
+    ShakespeareRecord record = new ObjectMapper().readValue(rawRecord, ShakespeareRecord.class);
     Put put = new Put(lineCoords2rowkey(plays.indexOf(record.play), record.lineCoordinates));
     put.addColumn(TestUtils.CF, TestUtils.QUALIFIER, Bytes.toBytes(rawRecord));
     return put;
