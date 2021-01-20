@@ -15,9 +15,7 @@ public class TestUtils {
 
   public static ArrayList<Result> extractAllResults(ResultScanner scanner) throws IOException {
     ArrayList<Result> results = new ArrayList<>();
-    for (Result result = scanner.next(); result != null; result = scanner.next()) {
-      results.add(result);
-    }
+    scanner.forEach(result -> results.add(result));
     return results;
   }
 
