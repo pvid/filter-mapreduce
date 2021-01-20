@@ -37,10 +37,13 @@ public class ShakespearDatasetSuiteElement {
   private static Logger LOG = LoggerFactory.getLogger(ShakespearDatasetSuiteElement.class);
 
   private static byte[] TABLE = Bytes.toBytes("shakespear_table");
-  private static Table table;
+  private static Table shakespearTable;
 
   private static Long ZERO = 0L;
-  private static Map<String, Integer> EMPTY_STRING_COUNT_MAP = new HashMap<>();
+
+  private static Map<String, Integer> emptyWordCount() {
+    return new HashMap<>();
+  }
 
   @BeforeClass
   public static void setup() throws IOException {
@@ -52,9 +55,9 @@ public class ShakespearDatasetSuiteElement {
             .setCoprocessor(ReducerEndpoint.class.getName()).build();
     MiniClusterSuite.hbase.getAdmin().createTable(shakespearTableDesc);
 
-    table = MiniClusterSuite.hbase.getTableByName(TABLE);
+    shakespearTable = MiniClusterSuite.hbase.getTableByName(TABLE);
 
-    populateShakespearTable(table);
+    populateShakespearTable(shakespearTable);
     LOG.info("Shakespear table populated.");
   }
 
@@ -65,7 +68,7 @@ public class ShakespearDatasetSuiteElement {
 
   @Test
   public void countLines() throws Throwable {
-    Dataset dataset = new Dataset(table);
+    Dataset dataset = new Dataset(shakespearTable);
 
     Long result =
         dataset.reduceRows(ZERO, (acc, row) -> acc + 1, ZERO, (acc, count) -> acc + count);
@@ -75,13 +78,22 @@ public class ShakespearDatasetSuiteElement {
 
   @Test
   public void wordCount() throws Throwable {
-    Dataset dataset = new Dataset(table);
+    Dataset dataset = new Dataset(shakespearTable);
 
-    SerializableFunction<byte[], byte[]> tokenize = cellValue -> {
+    SerializableFunction<byte[], byte[]> extractText = cellValue -> {
       try {
         ShakespearRecord record =
             new ObjectMapper().readValue(Bytes.toString(cellValue), ShakespearRecord.class);
-        String[] words = record.text.split("\\W+");
+        return Bytes.toBytes(record.text);
+      } catch (Throwable e) {
+        throw new RuntimeException(e);
+      }
+    };
+
+    SerializableFunction<byte[], byte[]> tokenize = cellValue -> {
+      try {
+        String text = Bytes.toString(cellValue);
+        String[] words = text.split("\\W+");
         String[] normalizedWords =
             Arrays.stream(words).map(word -> word.toLowerCase()).toArray(String[]::new);
         return SerdeUtil.serialize(normalizedWords);
@@ -109,8 +121,8 @@ public class ShakespearDatasetSuiteElement {
           return a;
         };
 
-    Map<String, Integer> result = dataset.mapCellValues(tokenize)
-        .reduceCellValues(EMPTY_STRING_COUNT_MAP, reducer, EMPTY_STRING_COUNT_MAP, merger);
+    Map<String, Integer> result = dataset.mapCellValues(extractText).mapCellValues(tokenize)
+        .reduceCellValues(emptyWordCount(), reducer, emptyWordCount(), merger);
 
     assert (result.size() > 0);
     LOG.info("Number of distinct words in Shakespearean plays: {}", result.size());
@@ -122,7 +134,9 @@ public class ShakespearDatasetSuiteElement {
 
   @Test
   public void countSpeakersAndTheirLines() throws Throwable {
-    Dataset dataset = new Dataset(table);
+    Dataset dataset = new Dataset(shakespearTable);
+
+    dataset.filterByRowkey(rowkey -> rowkey[0] % 2 == 0).toScanner();
 
     SerializableBiFunction<Map<String, Integer>, byte[], Map<String, Integer>> reducer =
         (acc, value) -> {
@@ -143,7 +157,7 @@ public class ShakespearDatasetSuiteElement {
         };
 
     Map<String, Integer> result =
-        dataset.reduceCellValues(EMPTY_STRING_COUNT_MAP, reducer, EMPTY_STRING_COUNT_MAP, merger);
+        dataset.reduceCellValues(emptyWordCount(), reducer, emptyWordCount(), merger);
 
     assert (result.size() > 0);
     LOG.info("Number of speakers in Shakespearean plays: {}", result.size());
